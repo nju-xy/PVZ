@@ -1,3 +1,0 @@
-D:/code/pvz/pvz/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/code/pvz/pvz/cmake-build-debug/CMakeFiles/source.dir
-D:/code/pvz/pvz/cmake-build-debug/CMakeFiles/rebuild_cache.dir
