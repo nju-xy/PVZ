@@ -11,19 +11,30 @@
 class Item {
 private:
     double cd;
+    int timer;
     int cost;
     int plant_no;
 public:
-    Item(int _no, int _cost, double _cd) : plant_no(_no), cd(_cd), cost(_cost) {}
-    double get_cd() {
-        return cd;
-    }
-    int get_cost() {
+    Item(int _no, int _cost, double _cd) : plant_no(_no), cd(_cd), cost(_cost), timer(0) {}
+//    double get_cd() const {
+//        return cd;
+//    }
+    int get_cost() const {
         return cost;
+    }
+    int get_timer() const {
+        return timer;
     }
     Plant* get_plant() const;
     int get_no() {
         return plant_no;
+    }
+    void update_timer() {
+        if(timer > 0)
+            timer --;
+    }
+    void reset_timer() {
+        timer = cd;
     }
 };
 

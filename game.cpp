@@ -20,6 +20,9 @@ int Game::get_game_time() const {
 }
 void Game::add_timer() {
     game_time ++;
+    for(int i = 0; i < market->number_of_items(); ++i) {
+        market->get_item_k(i)->update_timer();
+    }
     for(auto &zombie : zombies) {
         if(zombie)
             zombie->add_timer();
@@ -235,28 +238,31 @@ void Game::get_key(char ch) {
         {
             if(choose.first >= board_height) {
                 // chosen_plant = choose.second + 1;
-                market->choose_item((choose.first - board_height) * 3 + choose.second);
-                choose.first = choose.second = 0;
+                auto item = market->get_item_k((choose.first - board_height) * 3 + choose.second);
+                if(item->get_timer() == 0 && item->get_cost() <= sun) {
+                    sun -= item->get_cost();
+                    market->choose_item((choose.first - board_height) * 3 + choose.second);
+                    choose.first = choose.second = 0;
+                }
             }
             break;
         }
         case 'x': // 取消购买植物
         {
+            sun += market->get_chosen()->get_cost();
             market->cancel_choose();
             break;
         }
         case 'c': // 种植植物
         {
             Item* chosen_item = market->get_chosen();
-            if(chosen_item && sun >= chosen_item->get_cost()) {
-                if(plants[choose.first][choose.second])
-                    market->cancel_choose(); // 该位置有植物，种植失败
-                else {
+            if(chosen_item) {
+                if(!plants[choose.first][choose.second]) {
                     Plant* plant = chosen_item->get_plant();
                     plant->change_pos(choose.first, choose.second);
                     plants[choose.first][choose.second] = plant;
                     market->cancel_choose();
-                    sun -= chosen_item->get_cost();
+                    // sun -= chosen_item->get_cost();
                 }
             }
             break;
@@ -275,7 +281,7 @@ void Game::get_key(char ch) {
             else {
                 choose.first = MIN(board_height + 2, choose.first + 1);
                 if(choose.first == board_height)
-                    choose.second = MIN(2, choose.second);
+                    choose.second = 0;
             }
             break;
         }

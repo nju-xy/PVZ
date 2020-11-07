@@ -5,7 +5,7 @@
 #include "Plants.h"
 
 Bullet* Plant::shot() const {
-    if(timer % attack_interval == 0)
-        return new Bullet(pos.first, pos.second + 1, attack);
+//    if(timer % attack_interval == 0)
+//        return new Bullet(pos.first, pos.second + 1, attack);
     return nullptr;
 }

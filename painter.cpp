@@ -103,7 +103,7 @@ void Painter::paint_market(Market* market, int x, int y) const {
         if(market->get_chosen() && market->get_chosen()->get_no() == i) {
             cout << "[*] ";
         }
-        else if(x >= board_height && (x - board_height) * 3 + y == i && game.get_game_time() % 10 <= 4) {
+        else if(x >= board_height && (x - board_height) * 3 + y == i) {
             cout << "[+] ";
         }
         else {
@@ -113,7 +113,7 @@ void Painter::paint_market(Market* market, int x, int y) const {
         auto item = market->get_item_k(i);
         cout << item->get_plant()->get_name() << " ";
         cout << setw(3) << setfill(' ') << item->get_cost() << " ";
-        cout << setw(4) << setfill(' ') << item->get_cd() << "s";
+        cout << setw(4) << setfill(' ') << item->get_timer() << "s";
         if(i % 3 == 2)
             cout << endl;
         else
