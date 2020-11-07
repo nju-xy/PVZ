@@ -29,14 +29,14 @@ vector<Bullet*> Board::get_bullet(int i, int j) {
 
 void Board::add_zombie(Zombie* zom) {
     auto pos = zom->get_pos();
-    zombie_board[pos.first][pos.second].push_back(zom);
+    zombie_board[pos.first][int(pos.second)].push_back(zom);
 }
 void Board::add_bullet(Bullet* bul) {
      auto pos = bul->get_pos();
-     bullet_board[pos.first][pos.second].push_back(bul);
+     bullet_board[pos.first][int(pos.second)].push_back(bul);
 }
 void Board::add_plant(Plant* plant) {
     auto pos = plant->get_pos();
-    plant_board[pos.first][pos.second] = plant;
+    plant_board[pos.first][int(pos.second)] = plant;
 }
 

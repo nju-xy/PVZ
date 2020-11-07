@@ -5,11 +5,14 @@
 #include "object.h"
 
 // Object
-pair<int, int> Object::get_pos() const {
+pair<int, double> Object::get_pos() const {
     if(pos.second >= 0)
-        return make_pair(int(pos.first), int(pos.second));
+        return make_pair(pos.first, pos.second);
     else
-        return make_pair(int(pos.first), -1);
+        return make_pair(pos.first, -1);
+}
+string Object::get_name() const {
+    return name;
 }
 //void Object::change_pos(double x, double y) {
 //    pos.first = x;
@@ -34,12 +37,4 @@ void Object::add_timer() {
     timer++;
 }
 
-// Plant
-int Plant::get_cost() const {
-    return sun_cost;
-}
-Bullet* Plant::shot() const {
-    if(timer % shot_cd == 0)
-        return new Bullet(pos.first, pos.second + 1);
-    return nullptr;
-}
+

@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "object.h"
+#include "plants.h"
 
 class Board {
 private:

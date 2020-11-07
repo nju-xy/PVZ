@@ -4,7 +4,6 @@
 
 #include "game.h"
 
-Board board;
 Painter painter;
 
 pair<int, int> Game::get_choose() {
@@ -19,9 +18,6 @@ int Game::get_score() const {
 int Game::get_game_time() const {
     return game_time;
 }
-int Game::get_chosen_plant() const {
-    return chosen_plant;
-}
 void Game::add_timer() {
     game_time ++;
     for(auto &zombie : zombies) {
@@ -32,9 +28,15 @@ void Game::add_timer() {
         if(bullet)
             bullet->add_timer();
     }
-    for(auto &plant : plants) {
-        if(plant)
-            plant->add_timer();
+//    for(auto &plant : plants) {
+//        if(plant)
+//            plant->add_timer();
+//    }
+    for(int i = 0; i < nr_row; ++i) {
+        for (int j = 0; j < nr_col; ++j) {
+            if(plants[i][j])
+                plants[i][j]->add_timer();
+        }
     }
 }
 
@@ -45,33 +47,39 @@ void Game::update() { // 游戏每一帧内做的所有事情
     gen_sun(); // 产生太阳
 
     update_board(); // 在地图上布置僵尸、子弹和植物
-    painter.paint(board); // 将地图画出来
+    painter.paint(board, market); // 将地图画出来
     listen_keyboard(); // 检测键盘
 }
 
 void Game::update_board() {
-    board.clear();
+    board->clear();
     remove_dead();
-    for(auto plant : plants) {
-        board.add_plant(plant);
+//    for(auto plant : plants) {
+//        board->add_plant(plant);
+//    }
+    for(int i = 0; i < nr_row; ++i) {
+        for (int j = 0; j < nr_col; ++j) {
+            if(plants[i][j])
+                board->add_plant(plants[i][j]);
+        }
     }
     for(auto zombie : zombies) {
-        board.add_zombie(zombie);
+        board->add_zombie(zombie);
     }
     for(auto bullet : bullets) {
-        board.add_bullet(bullet);
+        board->add_bullet(bullet);
     }
 }
 
 void Game::remove_dead() {
-    for(auto iter = plants.begin(); iter!=plants.end(); )
-    {
-        Plant* plant = *iter;
-        if(!plant || plant->get_life() <= 0)
-            iter = plants.erase(iter);
-        else
-            iter ++;
-    }
+//    for(auto iter = plants.begin(); iter!=plants.end(); )
+//    {
+//        Plant* plant = *iter;
+//        if(!plant || plant->get_life() <= 0)
+//            iter = plants.erase(iter);
+//        else
+//            iter ++;
+//    }
     for(auto iter = zombies.begin(); iter!=zombies.end(); )
     {
         Zombie* zombie = *iter;
@@ -96,18 +104,30 @@ void Game::check_zombie_hit_plant() {
     for(auto & zombie : zombies)
     {
         bool flag = false;
-        for(auto iter2 = plants.begin(); iter2 != plants.end(); iter2++) {
-            Plant* plant = *iter2;
-            if(plant->get_pos() == zombie->get_pos()) { // 僵尸所在格子有植物
-                flag = true;
-                if(zombie->get_timer() % zombie_attack_rate == 0) {
-                    plant->minus_life(zombie->get_attack()); // 攻击植物
-                    if(plant->get_life() <= 0) {
-                        plant->~Plant();
-                        plants.erase(iter2);
-                        iter2--;
-                        continue;
-                    }
+//        for(auto iter2 = plants.begin(); iter2 != plants.end(); iter2++) {
+//            Plant* plant = *iter2;
+//            if(plant->get_pos() == zombie->get_pos()) { // 僵尸所在格子有植物
+//                flag = true;
+//                if(zombie->get_timer() % zombie_attack_rate == 0) {
+//                    plant->minus_life(zombie->get_attack()); // 攻击植物
+//                    if(plant->get_life() <= 0) {
+//                        plant->~Plant();
+//                        plants.erase(iter2);
+//                        iter2--;
+//                        continue;
+//                    }
+//                }
+//            }
+//        }
+        auto pos = zombie->get_pos();
+        if(plants[pos.first][int(pos.second)]) { // 僵尸所在格子有植物
+            Plant* plant = plants[pos.first][int(pos.second)];
+            flag = true;
+            if(zombie->get_timer() % zombie_attack_rate == 0) {
+                plant->minus_life(zombie->get_attack()); // 攻击植物
+                if(plant->get_life() <= 0) {
+                    plant->~Plant();
+                    plants[pos.first][int(pos.second)] = nullptr;
                 }
             }
         }
@@ -173,10 +193,19 @@ void Game::gen_zombies() {
 }
 
 void Game::gen_bullets() {
-    for(auto plant : plants) {
-        Bullet* bul = plant->shot();
-        if(bul)
-            bullets.push_back(bul);
+//    for(auto plant : plants) {
+//        Bullet* bul = plant->shot();
+//        if(bul)
+//            bullets.push_back(bul);
+//    }
+    for(int i = 0; i < nr_row; ++i) {
+        for (int j = 0; j < nr_col; ++j) {
+            if(plants[i][j]) {
+                Bullet* bul = plants[i][j]->shot();
+                if(bul)
+                    bullets.push_back(bul);
+            }
+        }
     }
 };
 
@@ -203,39 +232,65 @@ void Game::listen_keyboard() {
 void Game::get_key(char ch) {
     switch (ch) {
         case 'b': // 购买植物
-            if(choose.first == board_height) {
-                chosen_plant = choose.second + 1;
+        {
+            if(choose.first >= board_height) {
+                // chosen_plant = choose.second + 1;
+                market->choose_item((choose.first - board_height) * 3 + choose.second);
+                choose.first = choose.second = 0;
             }
             break;
+        }
         case 'x': // 取消购买植物
-            chosen_plant = 0;
+        {
+            market->cancel_choose();
             break;
+        }
         case 'c': // 种植植物
-            if(chosen_plant && sun >= plant_cost) {
-                Plant* plant = new Plant(choose.first, choose.second);
-                plants.push_back(plant);
-                chosen_plant = 0;
-                sun -= plant_cost;
+        {
+            Item* chosen_item = market->get_chosen();
+            if(chosen_item && sun >= chosen_item->get_cost()) {
+                if(plants[choose.first][choose.second])
+                    market->cancel_choose(); // 该位置有植物，种植失败
+                else {
+                    Plant* plant = chosen_item->get_plant();
+                    plant->change_pos(choose.first, choose.second);
+                    plants[choose.first][choose.second] = plant;
+                    market->cancel_choose();
+                    sun -= chosen_item->get_cost();
+                }
             }
             break;
+        }
         case 72: //上
+        {
             choose.first = MAX(0, choose.first - 1);
             if(choose.first < board_height)
                 choose.second = MIN(board_width - 1, choose.second);
             break;
+        }
         case 80: //下
-            choose.first = MIN(board_height, choose.first + 1);
-            if(choose.first == board_height)
-                choose.second = MIN(plant_kinds - 1, choose.second);
+        {
+            if(market->get_chosen())
+                choose.first = MIN(board_height - 1, choose.first + 1);
+            else {
+                choose.first = MIN(board_height + 2, choose.first + 1);
+                if(choose.first == board_height)
+                    choose.second = MIN(2, choose.second);
+            }
             break;
+        }
         case 75: //左
+        {
             choose.second = MAX(0, choose.second - 1);
             break;
+        }
         case 77: //右
-            if(choose.first != board_height)
+        {
+            if(choose.first < board_height)
                 choose.second = MIN(board_width - 1, choose.second + 1);
             else
-                choose.second = MIN(plant_kinds - 1, choose.second + 1);
+                choose.second = MIN(2, choose.second + 1);
             break;
+        }
     }
 }

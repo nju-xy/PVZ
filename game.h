@@ -8,24 +8,31 @@
 #include "object.h"
 #include "painter.h"
 #include "board.h"
+#include "plants.h"
+#include "market.h"
 
 class Game {
 public:
+    Market* market;
+    Board* board;
     vector<Zombie*> zombies; // 存储所有僵尸
     vector<Bullet*> bullets; // 存储所有子弹
-    vector<Plant*> plants; // 存储所有植物
+    // vector<Plant*> plants; // 存储所有植物
+    Plant* plants[nr_row][nr_col]; // 存储所有植物
     pair<int, int> choose; // 当前选中的位置
-    int chosen_plant; // 选中的植物标号
+    // int chosen_plant; // 选中的植物标号
     int sun, score; // 现有阳光和分数
     int game_time; // 游戏开始的时间
 public:
     Game() {
+        market = new Market;
+        board = new Board;
         choose.first = 0;
         choose.second = 0;
-        chosen_plant = 0;
         sun = 250;
         score = 0;
         game_time = 1;
+        memset(plants, 0, sizeof(plants));
     }
     int get_sun() const;
     int get_game_time() const;
