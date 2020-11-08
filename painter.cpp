@@ -53,10 +53,15 @@ void Painter::paint(pair<int, int> choose, int sun, int score, Market* market) {
 
 void Painter::add_zombie(Zombie* zom) {
     auto pos = zom->get_pos();
-    int x = pos.first * 6 + 1;
+    int x = pos.first * 6 + 3;
     int y = pos.second;
-    sprintf(&pixels[x][y], "%s", zom->get_name());
-    sprintf(&pixels[x + 1][y], "[%d]", zom->get_life());
+    if(pixels[x][y] != ' ')
+        x--;
+    if(pixels[x][y] != ' ')
+        x--;
+    // sprintf(&pixels[x][y], "%s", zom->get_name());
+    // sprintf(&pixels[x + 1][y], "[%d]", zom->get_life());
+    sprintf(&pixels[x][y], "[%s:%d]", zom->get_name(), zom->get_life());
 }
 void Painter::add_plant(Plant* plant) {
     auto pos = plant->get_pos();
@@ -99,7 +104,7 @@ void Painter::paint_market(Market* market, int x, int y) const {
         auto item = market->get_item_k(i);
         cout << item->get_plant()->get_name() << " ";
         cout << setw(3) << setfill(' ') << item->get_cost() << " ";
-        cout << setw(4) << setfill(' ') << item->get_timer() / 10 << "s";
+        cout << setw(4) << setfill(' ') << item->get_timer() / 10 << "." << item->get_timer() % 10 << "s";
         if(i % 3 == 2)
             cout << endl;
         else

@@ -5,9 +5,10 @@
 #ifndef SOURCE_GAME_H
 #define SOURCE_GAME_H
 
-#include "object.h"
+//#include "object.h"
 #include "painter.h"
 #include "plants.h"
+#include "zombie.h"
 #include "market.h"
 
 class Game {
@@ -23,7 +24,6 @@ private:
     // int chosen_plant; // 选中的植物标号
     int sun, score; // 现有阳光和分数
     int game_time; // 游戏开始的时间
-    void zombie_attack_plant(Zombie* zombie);
     void add_timer();
     void get_key(char ch);
     void listen_keyboard(); // 检测键盘按键并且做出相应反应
@@ -34,7 +34,8 @@ private:
     void gen_zombies(); // 生成新的僵尸
     void plant_shot(); // 植物攻击，生成子弹或者其他效果
     void gen_sun(); // 产生阳光
-    void boom(int x, int y, int d); // 爆炸（窝瓜和樱桃）
+    void plant_boom(int x, int y, int d); // 爆炸（窝瓜和樱桃）
+    void zombie_boom(int x, int y); // 爆炸（小丑）
     void remove_dead(); // 删除越界或者死亡的僵尸、子弹、植物
     void game_over(); // 失败，游戏结束
     void update_board(); // 更新地图
@@ -44,7 +45,7 @@ public:
         // board = new Board;
         painter = new Painter;
         choose.first = nr_row, choose.second = 0;
-        sun = 250;
+        sun = 2500;
         score = 0;
         game_time = 1;
         memset(plants, 0, sizeof(plants));

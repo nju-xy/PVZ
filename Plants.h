@@ -29,25 +29,25 @@ public:
 
 class Sunflower : public Plant {
 public:
-    Sunflower() : Plant("Sun     ", 300, 0, 25) {}
+    Sunflower() : Plant("Sun     ", 300, 0, 100) {}
     void shot(vector<Bullet*> &bullets);
-    void add_sun(int &sun);
+    int add_sun();
 };
 
 class Peashooter : public Plant {
 public:
-    Peashooter() : Plant("Pea     ", 300, 15, 20) {}
+    Peashooter() : Plant("Pea     ", 300, 20, 15) {}
 };
 
 class Repeater : public Plant {
 public:
-    Repeater() : Plant("Repeater", 300, 15, 20) {}
+    Repeater() : Plant("Repeater", 300, 20, 15) {}
     void shot(vector<Bullet*> &bullets);
 };
 
 class Snow_Pea : public Plant {
 public:
-    Snow_Pea() : Plant("Snow-pea", 300, 15, 20) {}
+    Snow_Pea() : Plant("Snow-pea", 300, 20, 15) {}
     void shot(vector<Bullet*> &bullets);
 };
 

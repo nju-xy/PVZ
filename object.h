@@ -38,17 +38,6 @@ public:
     void add_buff(int _buff);
 };
 
-class Zombie: public Object {
-public:
-    explicit Zombie(int line) {
-        name = "zombie  ";
-        pos.first = line, pos.second = maps_width - 12;
-        life = 75, attack = 100, speed = - 0.3, timer = 1;
-    }
-    void update_pos();
-    void random_change_pos();
-};
-
 class Bullet: public Object {
 public:
     Bullet(int x, double y, int _attack, int _buff = 0) {

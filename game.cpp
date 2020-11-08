@@ -60,6 +60,12 @@ void Game::update() { // 游戏每一帧内做的所有事情
     listen_keyboard(); // 检测键盘
 }
 
+bool cmp(Zombie *a, Zombie *b){
+    auto pos1 = a->get_pos();
+    auto pos2 = b->get_pos();
+    return (pos1.first < pos2.first) || (pos1.first == pos2.first && pos1.second < pos2.second);
+}
+
 void Game::update_board() {
     for(int i = 0; i < nr_row; ++i) {
         for (int j = 0; j < nr_col; ++j) {
@@ -68,6 +74,7 @@ void Game::update_board() {
             }
         }
     }
+    sort(zombies.begin(), zombies.end(), cmp);
     for(auto zombie : zombies) {
         assert(zombie);
         painter->add_zombie(zombie);
@@ -106,18 +113,39 @@ void Game::check_zombie_hit_plant() {
         bool flag = false;
         auto pos = zombie->get_pos();
         pos.second = (pos.second - 1) / 12;
-        if(pos.second < nr_col && plants[pos.first][pos.second]) { // 僵尸前进一步以后所在格子有植物
-            Plant* plant = plants[pos.first][pos.second];
-            if(strcmp(plant->get_name(), "Squash  ")) { // 窝瓜不阻挡
-                flag = true;
-                if(zombie->get_timer() % 10 == 0) {
-                    plant->minus_life(zombie->get_attack()); // 攻击植物
-                    if(strcmp(plant->get_name(), "Garlic  ") == 0 && plant->check_pumpkin() <= 0) {
-                        zombie->random_change_pos();
-                    }
+        if(strcmp(zombie->get_name(), "catapult") == 0) {
+            for(int i = 0; i < nr_col; ++i) {
+                Plant* plant = plants[pos.first][i];
+                if(plant) {
+                    int damage = ((Catapult*)zombie)->ball_damage();
+                    plant->minus_life(damage); // 攻击植物
+                    if(damage)
+                        painter->add_boom(6 * pos.first + 3, 12 * i + 1);
                     if(plant->get_life() <= 0) {
                         plant->~Plant();
-                        plants[pos.first][pos.second] = nullptr;
+                        plants[pos.first][i] = nullptr;
+                    }
+                    break;
+                }
+            }
+        }
+        if(pos.second < nr_col && plants[pos.first][pos.second]) { // 僵尸前进一步以后所在格子有植物
+            Plant* plant = plants[pos.first][pos.second];
+            if(strcmp(plant->get_name(), "Squash  ") != 0) { // 窝瓜不阻挡
+                flag = true;
+                if(zombie->get_timer() % 10 == 0) {
+                    if(strcmp(zombie->get_name(), "pole") == 0 && ((Pole_Vaunting*)zombie)->jump()) {
+                        zombie->change_pos(pos.first, pos.second * 12 - 1);
+                    }
+                    else {
+                        plant->minus_life(zombie->get_attack()); // 攻击植物
+                        if(strcmp(plant->get_name(), "Garlic  ") == 0 && plant->check_pumpkin() <= 0) {
+                            zombie->random_change_pos();
+                        }
+                        if(plant->get_life() <= 0) {
+                            plant->~Plant();
+                            plants[pos.first][pos.second] = nullptr;
+                        }
                     }
                 }
             }
@@ -128,7 +156,7 @@ void Game::check_zombie_hit_plant() {
             Plant* plant = plants[pos.first][pos.second];
             if(strcmp(plant->get_name(), "Squash  ") == 0) {
                 auto pos2 = plant->get_pos();
-                boom(pos2.first, pos2.second, 1);
+                plant_boom(pos2.first, pos2.second, 1);
                 plants[pos.first][pos.second] = nullptr;
             }
             continue;
@@ -169,6 +197,9 @@ void Game::check_bullet_hit_zombie() {
                 iter2--;
                 if(zombie->get_life() <= 0) {
                     // 僵尸没血了就消失
+                    if(strcmp(zombie->get_name(), "jack") == 0) { // 3 * 3爆炸
+                        zombie_boom(zombie->get_pos().first, zombie->get_pos().second);
+                    }
                     zombie->~Zombie();
                     zombies.erase(iter1);
                     iter1--;
@@ -193,8 +224,34 @@ void Game::update_bullets() {
     check_bullet_hit_zombie();
 }
 void Game::gen_zombies() {
-    if(game_time % zombie_rate == 0) {
-        Zombie* zom = new Zombie(rand() % nr_row);
+    if(game_time % 50 == 0) {
+        int line = rand() % nr_row;
+        Zombie* zom;
+        if(game_time <= 200) { // 前20s
+            zom = new Common();
+        }
+        else if(game_time >= 1000 && game_time % 300 == 0) {
+            zom = new Catapult;
+        }
+        else { // 20 - 100s
+            int r = rand() % 100;
+            if(r < 50) {
+                zom = new Common;
+            }
+            else if(r < 80) {
+                zom = new Conehead;
+            }
+            else if(r < 85) {
+                zom = new Newspaper;
+            }
+            else if(r < 95) {
+                zom = new Pole_Vaunting;
+            }
+            else {
+                zom = new Jack_in_the_Box;
+            }
+        }
+        zom->change_pos(line, maps_width - 12);
         zombies.push_back(zom);
     }
 }
@@ -206,15 +263,12 @@ void Game::plant_shot() {
                 plants[i][j]->shot(bullets);
                 if(strcmp(plants[i][j]->get_name(), "Cherry  ") == 0) {
                     auto pos = plants[i][j]->get_pos();
-                    boom(pos.first, pos.second, 3);
+                    plant_boom(pos.first, pos.second, 3);
                     plants[i][j] = nullptr;
                 }
-                else if(strcmp(plants[i][j]->get_name(), "Sun  ") == 0) {
-                    ((Sunflower*)plants[i][j])->add_sun(sun);
+                else if(strcmp(plants[i][j]->get_name(), "Sun     ") == 0) {
+                    sun += ((Sunflower*)plants[i][j])->add_sun();
                 }
-//                Bullet* bul = plants[i][j]->shot();
-//                if(bul)
-//                    bullets.push_back(bul);
             }
         }
     }
@@ -231,14 +285,36 @@ void Game::game_over() {
     Sleep(50000);
     exit(0);
 }
+void Game::zombie_boom(int x, int y) { // 爆炸（僵尸）
+    for (int i = 0; i < nr_row; ++i) {
+        for (int j = 0; j < nr_col; ++j) {
+            if(!plants[i][j])
+                continue;
+            auto pos = plants[i][j]->get_pos();
+            if(abs(pos.first - x) <= 1 && abs(pos.second - y) <= 18) {
+                plants[i][j]->~Plant();
+                plants[i][j] = nullptr;
+            }
+        }
+    }
+    for(int i = (x - 1) * 6 + 1; i < (x + 2) * 6; ++i) {
+        for (int j = y - 18; j <= y + 18; ++j) {
+            if(i < maps_height && i >= 0 && j >= 0 && j < maps_width)
+                painter->add_boom(i, j);
+        }
+    }
+}
 
-void Game::boom(int x, int y, int d) {
+void Game::plant_boom(int x, int y, int d) { // 爆炸（植物）
     double r = d / 2.0;
     for(auto iter = zombies.begin(); iter !=zombies.end(); iter++) {
         Zombie* zombie = *iter;
         auto pos = zombie->get_pos();
         int x2 = pos.first, y2 = pos.second;
         if(x2 <= x + r && x2 >= x - r && y2 > y - r * 12 && y2 <= y + r * 12) {
+            if(strcmp(zombie->get_name(), "jack") == 0) {
+                zombie_boom(x2, y2);
+            }
             zombies.erase(iter);
             iter--;
         }

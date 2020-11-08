@@ -45,24 +45,3 @@ void Object::add_timer() {
     if(buff_timer == 0)
         buff = 0;
 }
-void Zombie::update_pos() {
-    if(buff == 1)
-        pos.second = pos.second + speed / 2;
-    else
-        pos.second = pos.second + speed;
-}
-
-void Zombie::random_change_pos() {
-    if(pos.first == 0)
-        pos.first ++;
-    else if(pos.first == nr_row - 1)
-        pos.first --;
-    else {
-        if(rand() % 2)
-            pos.first ++;
-        else
-            pos.first --;
-    }
-}
-
-

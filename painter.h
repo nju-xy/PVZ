@@ -10,6 +10,7 @@
 #include "board.h"
 #include "market.h"
 #include "common.h"
+#include "zombie.h"
 using namespace std;
 
 class Painter{

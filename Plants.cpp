@@ -37,8 +37,9 @@ void Snow_Pea::shot(vector<Bullet*> &bullets) { // 双发射手发出发出子�
 void Sunflower::shot(vector<Bullet*> &bullets) { // 向日葵不发射子弹
 }
 
-void Sunflower::add_sun(int &sun) {
+int Sunflower::add_sun() {
     if(attack_interval > 0 && timer % attack_interval == 0) {
-        sun += 25;
+        return 25;
     }
+    return 0;
 }

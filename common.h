@@ -6,7 +6,9 @@
 #define SOURCE_COMMON_H
 
 #include <iostream>
-#include <assert.h>
+#include <algorithm>
+#include <cassert>
+#include <cmath>
 #include <iomanip>
 #include <conio.h>
 #include <windows.h>
@@ -27,15 +29,7 @@ using namespace std;
 const int nr_row = 3, nr_col = 7;
 const int maps_height = nr_row * 6 + 1, maps_width = (nr_col + 1) * 12 + 1;
 
-const int zombie_rate = 50;
-//const int zombie_attack_rate = 10;
-//const int zombie_life = 30, zombie_attack = 4;
-//const double zombie_speed = 0.05;
-
 const int sun_rate = 20;
 const int one_sun = 25;
-// const int plant_kinds = 1;
-// const int shot_cd = 10;
-// const int plant_cost = 100, plant_life = 10, plant_attack = 10;
 
 #endif //SOURCE_COMMON_H
