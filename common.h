@@ -24,14 +24,13 @@ using namespace std;
 #define MIN(a, b) (a < b ? a : b)
 #define INF 0x3f3f3f3f
 
-const int board_width = 7, board_height = 3;
 const int nr_row = 3, nr_col = 7;
+const int maps_height = nr_row * 6 + 1, maps_width = (nr_col + 1) * 12 + 1;
 
-const int zombie_rate = 20;
-const int zombie_attack_rate = 10;
-const int zombie_life = 30, zombie_attack = 4;
-const double zombie_speed = 0.05;
-const double bullet_speed = 0.2;
+const int zombie_rate = 50;
+//const int zombie_attack_rate = 10;
+//const int zombie_life = 30, zombie_attack = 4;
+//const double zombie_speed = 0.05;
 
 const int sun_rate = 20;
 const int one_sun = 25;

@@ -5,19 +5,25 @@
 #include "object.h"
 
 // Object
-pair<int, double> Object::get_pos() const {
+pair<int, int> Object::get_pos() const {
     if(pos.second >= 0)
-        return make_pair(pos.first, pos.second);
+        return make_pair(pos.first, int(pos.second));
     else
         return make_pair(pos.first, -1);
 }
-string Object::get_name() const {
+const char* Object::get_name() const {
     return name;
 }
 //void Object::change_pos(double x, double y) {
 //    pos.first = x;
 //    pos.second = y;
 //}
+int Object::get_buff() {
+    return buff;
+}
+void Object::add_buff(int _buff) {
+    buff = _buff, buff_timer = 10;
+}
 void Object::update_pos() {
     pos.second = pos.second + speed;
 }
@@ -35,6 +41,28 @@ int Object::get_timer() const {
 }
 void Object::add_timer() {
     timer++;
+    buff_timer--;
+    if(buff_timer == 0)
+        buff = 0;
+}
+void Zombie::update_pos() {
+    if(buff == 1)
+        pos.second = pos.second + speed / 2;
+    else
+        pos.second = pos.second + speed;
+}
+
+void Zombie::random_change_pos() {
+    if(pos.first == 0)
+        pos.first ++;
+    else if(pos.first == nr_row - 1)
+        pos.first --;
+    else {
+        if(rand() % 2)
+            pos.first ++;
+        else
+            pos.first --;
+    }
 }
 
 

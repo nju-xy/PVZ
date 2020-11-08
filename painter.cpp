@@ -4,97 +4,83 @@
 
 #include "painter.h"
 
-extern Game game;
-
 HANDLE screen = GetStdHandle(STD_OUTPUT_HANDLE);
 
-void Painter::paint(Board* board, Market* market) const {
-    // system("cls"); // 这样会闪，效果太差了
+void Painter::init() {
+    for(int i = 0; i < maps_height; ++i) {
+        for(int j = 0; j < maps_width; ++j) {
+            pixels[i][j] = ' ';
+            boom[i][j] = false;
+        }
+    }
+}
+
+void Painter::paint(pair<int, int> choose, int sun, int score, Market* market) {
+    // 画格子
+    for(int i = 0; i < maps_height; i += 6) {
+        for(int j = 0; j < maps_width - 12; ++j) {
+            pixels[i][j] = '#';
+        }
+        for(int j = maps_width - 12; j < maps_width; ++j) {
+            pixels[i][j] = '-';
+        }
+    }
+    for(int i = 0; i < maps_height; ++i) {
+        for (int j = 0; j < maps_width; ++j) {
+            if(boom[i][j])
+                pixels[i][j] = 'x';
+        }
+    }
+    if(choose.first < nr_row) {
+        for(int i = 0; i < 5; ++i) {
+            pixels[1 + 6 * choose.first + i][12 * choose.second] = '|';
+            pixels[1 + 6 * choose.first + i][12 * choose.second + 12] = '|';
+        }
+    }
     COORD position;    // position 是一个 COORD 结构
     position.X = position.Y = 0;
     SetConsoleCursorPosition(screen, position);
-
-    auto choose = game.get_choose();
-    for(int i = 0; i <= board_height; ++i) { // 3行
-        for (int j = 0; j < board_width; ++j) {
-//            if(choose.first == board_height)
-//                cout << "###########";
-//            else if(choose.first >= 0 && (i == choose.first || i == choose.first + 1) && j == choose.second)
-//                cout << "-----------";
-//            else
-//                cout << "###########";
-            cout << "###########";
+    for(int i = 0; i < maps_height; ++i) {
+        for(int j = 0; j < maps_width; ++j) {
+            cout << pixels[i][j];
         }
-        cout << "#" << endl;
-        if(i == board_height)
-            continue;
-        for (int k = 0; k < 5; ++k) {
-            for (int j = 0; j <= board_width; ++j) {
-                if(choose.first >= 0 && i == choose.first && (j == choose.second || j == choose.second + 1))
-                    cout << "|";
-                else
-                    cout << " ";
-                if(j == board_width)
-                    continue;
-                if(k == 0) { // 僵尸
-                    vector<Zombie*> zombies = board->get_zombie(i, j);
-//                    if(zombies.size()) {
-//                        cout << " zombie   ";
-//                    }
-//                    else {
-//                        cout << "          ";
-//                    }
-                    if(zombies.empty()) {
-                        cout << "          ";
-                        continue;
-                    }
-                    int s = MIN(5, zombies.size());
-                    for(int t = 0; t < s; ++t) {
-                        cout << "z";
-                    }
-                    cout << "ombie";
-                    for(int t = 0; t + s < 5; ++t) {
-                        cout << " ";
-                    }
-                }
-                else if(k == 3) { // 植物
-                    Plant* plant = board->get_plant(i, j);
-                    if(plant) {
-                        cout << plant->get_name() << "  ";
-                    }
-                    else {
-                        cout << "          ";
-                    }
-                }
-                else if(k == 4) { // 植物的血量
-                    Plant* plant = board->get_plant(i, j);
-                    if(plant) {
-                        cout << setw(4) << setfill(' ') << plant->get_life() << "      ";
-                    }
-                    else {
-                        cout << "          ";
-                    }
-                }
-                else if(k == 1) { // 子弹
-                    auto bullets = board->get_bullet(i, j);
-                    int s = MIN(10, bullets.size());
-                    for(int t = 0; t < s; ++t) {
-                        cout << "O";
-                    }
-                    for(int t = 0; t + s < 10; ++t) {
-                        cout << " ";
-                    }
-                }
-                else {
-                    cout << "          ";
-                }
-            }
-            cout << endl;
-        }
+        cout << endl;
     }
-    cout << "==============================================================================" << endl;
-    cout << "[shop] sun: "<< game.get_sun() << "                   [score]:" << game.get_score() << endl;
+    cout << "[shop] sun: "<< sun;
+    cout << "                   [score]:" << score << endl;
     paint_market(market, choose.first, choose.second);
+}
+
+void Painter::add_zombie(Zombie* zom) {
+    auto pos = zom->get_pos();
+    int x = pos.first * 6 + 1;
+    int y = pos.second;
+    sprintf(&pixels[x][y], "%s", zom->get_name());
+    sprintf(&pixels[x + 1][y], "[%d]", zom->get_life());
+}
+void Painter::add_plant(Plant* plant) {
+    auto pos = plant->get_pos();
+    int x = pos.first * 6 + 4;
+    int y = pos.second - 4;
+    int pumpkin = plant->check_pumpkin();
+    if(pumpkin > 0) {
+        sprintf(&pixels[x][y], "{%s}", plant->get_name());
+        sprintf(&pixels[x + 1][y], "[%d]%d", plant->get_life(), pumpkin);
+    }
+    else {
+        sprintf(&pixels[x][y], "%s", plant->get_name());
+        sprintf(&pixels[x + 1][y], "[%d]", plant->get_life());
+    }
+}
+void Painter::add_boom(int x, int y) {
+    boom[x][y] = true;
+}
+
+void Painter::add_bullet(Bullet* bul) {
+    auto pos = bul->get_pos();
+    int x = pos.first * 6 + 3;
+    int y = pos.second;
+    pixels[x][y] = 'o';
 }
 
 void Painter::paint_market(Market* market, int x, int y) const {
@@ -103,7 +89,7 @@ void Painter::paint_market(Market* market, int x, int y) const {
         if(market->get_chosen() && market->get_chosen()->get_no() == i) {
             cout << "[*] ";
         }
-        else if(x >= board_height && (x - board_height) * 3 + y == i) {
+        else if(x >= nr_row && (x - nr_row) * 3 + y == i) {
             cout << "[+] ";
         }
         else {
@@ -113,27 +99,13 @@ void Painter::paint_market(Market* market, int x, int y) const {
         auto item = market->get_item_k(i);
         cout << item->get_plant()->get_name() << " ";
         cout << setw(3) << setfill(' ') << item->get_cost() << " ";
-        cout << setw(4) << setfill(' ') << item->get_timer() << "s";
+        cout << setw(4) << setfill(' ') << item->get_timer() / 10 << "s";
         if(i % 3 == 2)
             cout << endl;
         else
             cout << "     ";
     }
-//    if(x == board_height && y == 0 && game.get_game_time() % 4 <= 1)
-//        cout << "[+]";
-//    else if(game.get_chosen_plant())
-//        cout << "[+]";
-//    else
-//        cout << "[ ]";
-//    cout << " Peashooter 100" << endl;
-
-//    if(choose.first == board_height && choose.second == 1)
-//        cout << "[-]";
-//    else
-//        cout << "[ ]";
-//    cout << " Sunflower 50 ";
-
-    cout << "==============================================================================" << endl;
+    cout << endl << "==============================================================================" << endl;
     cout << "Select plant: b; Cancel selection: x; Grow plant: c; " << endl;
 }
 

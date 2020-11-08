@@ -10,12 +10,12 @@
 
 class Item {
 private:
-    double cd;
+    int cd;
     int timer;
     int cost;
     int plant_no;
 public:
-    Item(int _no, int _cost, double _cd) : plant_no(_no), cd(_cd), cost(_cost), timer(0) {}
+    Item(int _no, int _cost, double _cd) : plant_no(_no), cd(int(_cd * 10)), cost(_cost), timer(0) {}
 //    double get_cd() const {
 //        return cd;
 //    }
