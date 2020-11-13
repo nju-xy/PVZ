@@ -134,7 +134,7 @@
 | 读报僵尸 | Newspaper Zombie       | 420=150+270 | 100 / s           | 4-7s/格，1.8s/格 |
 | 撑杆僵尸 | Pole Vaunting Zombie   | 500         | 100 / s           | 2.5s/格，4-7s/格 |
 | 小丑僵尸 | Jack-in-the-Box Zombie | 500         | 100 / s，秒杀     | 2.2s/格          |
-| 投石僵尸 | Catapult Zombie        | 850         | 75 / s * 20，秒杀 | 2.5s/格          |
+| 投石僵尸 | Catapult Zombie        | 850         | 75 / s * 20，秒杀 | 2.5s/格，4-7s/格 |
 
 ### 商店设计扩展
 
