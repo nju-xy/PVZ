@@ -1,0 +1,16 @@
+INPUT(
+./debug\qrc_imgages.o
+./debug\GameWindow.o
+./debug\main.o
+./debug\MainWindow.o
+./debug\game.o
+./debug\market.o
+./debug\object.o
+./debug\painter.o
+./debug\plants.o
+./debug\zombie.o
+./debug\RankingWindow.o
+./debug\moc_GameWindow.o
+./debug\moc_MainWindow.o
+./debug\moc_RankingWindow.o
+);
